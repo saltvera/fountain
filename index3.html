@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>전국 약수터 검색 SPA (Neumorphism Style)</title>
+  <!-- Pretendard 폰트 CDNs -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+  <style>
+    /* ========== 1) 기본 설정 ========== */
+    * {
+      margin: 0; padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background: #E0E0E0; /* Neumorphism에서 주로 쓰이는 밝은 그레이 톤 배경 */
+      color: #333;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ========== 2) 색상 & 공통 변수 ========== */
+    :root {
+      --bg-color: #E0E0E0;       /* 전체 배경색 */
+      --primary-color: #3C73FF;  /* 포인트 컬러 (블루) */
+      --text-color: #333333;
+      /* 네오스큐어 스타일의 그림자 (밝은 + 어두운) */
+      --shadow-light: #FFFFFF;
+      --shadow-dark: #B0B0B0;
+    }
+
+    /* ========== 3) Neumorphism 효과 (공통 클래스) ========== */
+    .neumorphic {
+      background: var(--bg-color);
+      box-shadow:
+        8px 8px 16px var(--shadow-dark),
+        -8px -8px 16px var(--shadow-light);
+      border-radius: 16px;
+    }
+    .soft-edge {
+      border-radius: 50px;
+    }
+    .inset {
+      box-shadow:
+        inset 8px 8px 16px var(--shadow-dark),
+        inset -8px -8px 16px var(--shadow-light);
+    }
+
+    /* ========== 4) 헤더 ========== */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      background: var(--bg-color);
+      z-index: 999;
+      box-shadow:
+        0 2px 4px rgba(0,0,0,0.08),
+        0 2px 4px rgba(255,255,255,0.1);
+    }
+    .logo {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    nav ul {
+      display: flex;
+      gap: 1.2rem;
+      list-style: none;
+    }
+
+    /* ========== 5) Hero 섹션 ========== */
+    .hero {
+      width: 100%;
+      height: 70vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      margin-top: 64px; /* 헤더 높이만큼 아래로 */
+      position: relative;
+    }
+    .hero .hero-content {
+      max-width: 600px;
+      margin: 0 1rem;
+    }
+    .hero h1 {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+      color: var(--text-color);
+      letter-spacing: -0.5px;
+    }
+    .hero p {
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      color: #555;
+      line-height: 1.4;
+    }
+
+    /* ========== 6) 검색 박스 (Neumorphic) ========== */
+    .search-box {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.5rem;
+      border-radius: 50px;
+      background: var(--bg-color);
+      box-shadow:
+        6px 6px 12px var(--shadow-dark),
+        -6px -6px 12px var(--shadow-light);
+    }
+    .search-box input {
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      width: 180px;
+      color: var(--text-color);
+    }
+    .search-box input::placeholder {
+      color: #999;
+    }
+    .search-btn {
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      border-radius: 40px;
+      padding: 0.6rem 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      box-shadow:
+        2px 2px 5px rgba(0,0,0,0.15),
+        -1px -1px 4px rgba(255,255,255,0.6);
+      transition: background-color 0.2s;
+    }
+    .search-btn:hover {
+      background-color: #2F5ECD;
+    }
+
+    /* ========== 7) 지도 + 리스트 메인 컨텐츠 ========== */
+    .main-content {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .map {
+      flex: 1 1 55%;
+      min-height: 400px;
+      border-radius: 16px;
+      position: relative;
+      background: var(--bg-color);
+      box-shadow:
+        6px 6px 12px var(--shadow-dark),
+        -6px -6px 12px var(--shadow-light);
+    }
+    .list {
+      flex: 1 1 40%;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .card {
+      background: var(--bg-color);
+      border-radius: 16px;
+      box-shadow:
+        6px 6px 12px var(--shadow-dark),
+        -6px -6px 12px var(--shadow-light);
+      padding: 1rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        3px 3px 8px var(--shadow-dark),
+        -3px -3px 8px var(--shadow-light);
+    }
+    .card h3 {
+      color: var(--primary-color);
+      margin-bottom: 0.3rem;
+    }
+    .card p {
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.4;
+    }
+
+    /* ========== 8) 푸터 ========== */
+    footer {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    /* ========== 9) 반응형 ========== */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 1.8rem; }
+      .hero p { font-size: 0.95rem; }
+      .search-box input {
+        width: 120px;
+      }
+      .map, .list {
+        flex: 1 1 100%;
+        min-height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<header>
+  <div class="logo">약수터 Finder</div>
+  <nav>
+    <ul>
+      <li><a href="#">소개</a></li>
+      <li><a href="#">문의</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- Hero 섹션 -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>약수터를<br>네오스큐어 스타일로 찾아보세요</h1>
+    <p>Neumorphism UI로 디자인된<br>감각적인 약수터 검색 페이지</p>
+    <div class="search-box">
+      <input type="text" placeholder="지역명·약수터명 입력" />
+      <button class="search-btn">검색</button>
+    </div>
+  </div>
+</section>
+
+<!-- 메인 컨텐츠 (지도 + 리스트) -->
+<section class="main-content">
+  <div class="map">
+    <!-- 지도 Placeholder -->
+  </div>
+  <div class="list">
+    <div class="card">
+      <h3>약수터 A</h3>
+      <p>서울특별시 ○○구 ○○로<br>편의시설: 화장실, 주차장</p>
+    </div>
+    <div class="card">
+      <h3>약수터 B</h3>
+      <p>경기도 ○○시 ○○동<br>편의시설: 화장실</p>
+    </div>
+    <div class="card">
+      <h3>약수터 C</h3>
+      <p>부산광역시 ○○구 ○○번길<br>편의시설: 없음</p>
+    </div>
+  </div>
+</section>
+
+<!-- 푸터 -->
+<footer>
+  © 2025 Neumorphic 약수터 Finder. All Rights Reserved.
+</footer>
+
+</body>
+</html>
